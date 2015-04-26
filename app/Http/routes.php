@@ -20,4 +20,4 @@ Route::controllers([
 	'password' => 'Auth\PasswordController',
 ]);
 
-Route::get('leaderboard', 'GameController@showLeaderboard');
+Route::get('leaderboard', 'LeaderboardController@index');

@@ -14,7 +14,7 @@ class LeaderboardController extends Controller {
 	 */
 	public function index()
 	{
-		//
+        return View::make('home.leaderboard');
 	}
 
 	/**
