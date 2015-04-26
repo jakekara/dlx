@@ -6,6 +6,8 @@ class LeaderboardController extends Controller
 {
     public function index()
     {
-            return view('home.leaderboard');
+        // get top 10 games
+        
+        return view('home.leaderboard', array('games'=>'Games Variable'));
     }
 }
