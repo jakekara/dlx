@@ -12,7 +12,16 @@ class CreateGamesTable extends Migration {
 	 */
 	public function up()
 	{
-		//
+        Schema::create('games', function(Blueprint $table)
+		{
+			$table->bigIncrements('id');
+			$table->boolean('active');
+			$table->bigInteger('turn');
+            $table->bigInteger('score');
+            $table->string('players', 3000); //max 30 chars per ID, * 100 players
+			$table->timestamps();
+		});
+
 	}
 
 	/**
@@ -23,6 +32,7 @@ class CreateGamesTable extends Migration {
 	public function down()
 	{
 		//
+        Schema::drop('games');
 	}
 
 }

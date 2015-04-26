@@ -1,0 +1,15 @@
+class UserController extends BaseController {
+
+    /**
+     * Show the profile for the given user.
+     */
+     
+    
+    protected $layout = 'layouts.master';
+     
+    public function showLeaderboard()
+    {
+        return View::make('home.leaderboard');
+    }
+
+}
