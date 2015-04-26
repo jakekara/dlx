@@ -2,7 +2,10 @@
 
 use Illuminate\Routing\Controllers;
 
-public function index()
+class LeaderboardController extends Controller
 {
-        return 'Hello';
+    public function index()
+    {
+            return 'Hello';
+    }
 }
