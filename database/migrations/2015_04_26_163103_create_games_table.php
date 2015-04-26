@@ -21,6 +21,7 @@ class CreateGamesTable extends Migration {
             $table->string('players', 3000); //max 30 chars per ID, * 100 players
 			$table->timestamps();
 		});
+        
 
 	}
 
@@ -32,7 +33,7 @@ class CreateGamesTable extends Migration {
 	public function down()
 	{
 		//
-        Schema::drop('games');
+        Schema::dropIfExists('games');
 	}
 
 }

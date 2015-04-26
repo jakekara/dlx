@@ -21,3 +21,5 @@ Route::controllers([
 ]);
 
 Route::get('leaderboard', 'LeaderboardController@index');
+Route::get('game/{game_id}', "GameController@showGame");
+Route::post('playWord', "GameController@playWord");

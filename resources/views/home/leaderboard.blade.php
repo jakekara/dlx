@@ -1,13 +1,20 @@
 @extends('layouts.master')
 @section('content')
 
-    <h3>Leaderboard</h3>
+    <h1>Leaderboard</h1>
 
-    <table>
+    <table class="table">
         <tr>
-            <?php var_dump($games); ?>
-            <td>Rank</td>
-            <td>Game...</td>
+            <th>Score</th>
+            <th>Game</th>
+            <th>Players</th>
         </tr>
+        <?php foreach ($games as $game):?>
+            <tr>
+                <td><?= $game->score ?></td>
+                <td>Dyslexicondominium....</td>
+                <td><?= $game->players ?></td>
+            </tr>
+        <?php endforeach; ?>
     </table>
 @stop

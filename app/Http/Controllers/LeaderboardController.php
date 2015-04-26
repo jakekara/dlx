@@ -1,6 +1,7 @@
 <?php namespace App\HTTP\Controllers;
 
 use Illuminate\Routing\Controllers;
+use DB;
 
 class LeaderboardController extends Controller
 {
