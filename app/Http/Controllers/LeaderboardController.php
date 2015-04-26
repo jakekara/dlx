@@ -6,6 +6,6 @@ class LeaderboardController extends Controller
 {
     public function index()
     {
-            return view('home.Leaderboard');
+            return view('home.leaderboard');
     }
 }
