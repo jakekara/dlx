@@ -46,7 +46,7 @@ Route::get('login/status', function(){
 Route::get('login', 'AuthController@login');
 Route::get('/', 'HomeController@goHome');
 Route::get('home', 'HomeController@goHome');
-Route::get('leaderboard', 'LeaderboardController@index');
+Route::match(['get', 'post'], 'leaderboard', 'LeaderboardController@index');
 
 Route::group(['middleware' => ['App\Http\Middleware\checker']], function()
 {
