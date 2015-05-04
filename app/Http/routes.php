@@ -44,7 +44,7 @@ Route::get('login/status', function(){
 
 
 Route::get('login', 'AuthController@login');
-Route::get('/', 'HomeController@goHome');
+Route::match(['get', 'post'], '/', 'HomeController@goHome');
 Route::get('home', 'HomeController@goHome');
 Route::match(['get', 'post'], 'leaderboard', 'LeaderboardController@index');
 
