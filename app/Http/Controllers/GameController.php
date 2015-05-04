@@ -1,8 +1,8 @@
-<?php namespace App\HTTP\Controllers;
+<?php namespace App\Http\Controllers;
 
 use App\Game;
 use App\Word;
-use Illuminate\Routing\Controllers;
+//use Illuminate\Routing\Controllers;
 use Illuminate\Support\Facades\Request;
 use Input;
 use DB;
