@@ -33,5 +33,9 @@ return [
 		'model'  => 'App\User',
 		'secret' => '',
 	],
-
+    'facebook' => [
+        'client_id' => env('FB_APPID'),
+        'client_secret' => env('FB_APPSECRET'),
+        'redirect' => env('FB_REDIRECT'),
+    ],
 ];

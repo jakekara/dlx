@@ -18,6 +18,11 @@ class CreateWordsTable2 extends Migration {
             $table->string('word', 100);
             $table->integer('position');
             $table->primary(array('game_id', 'word'));
+            
+            $table->foreign('game_id')
+                ->references('id')
+                ->on('games');
+            $table->timestamps();
         });
 
 	}

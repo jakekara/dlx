@@ -11,15 +11,49 @@
 |
 */
 
-Route::get('/', 'WelcomeController@index');
+use App\Http\Middleware;
 
-Route::get('home', 'HomeController@index');
+Route::get('/teapot', function()
+{
+    return 'I am a teapot';
+});
 
+/*
 Route::controllers([
 	'auth' => 'Auth\AuthController',
 	'password' => 'Auth\PasswordController',
-]);
+]);*/
 
+
+Route::get('logout', function()
+{
+    Auth::logout();
+    return redirect('/');
+});
+
+Route::get('login/status', function(){
+    if (Auth::check())
+    {
+        return "Logged in as " . $Auth::user()->name;
+    }
+    else
+    {
+        return "Not logged in.";
+    }
+});
+
+
+Route::get('login', 'AuthController@login');
+Route::get('/', 'HomeController@guestHome');
+Route::get('home', 'HomeController@goHome');
 Route::get('leaderboard', 'LeaderboardController@index');
-Route::get('game/{game_id}', "GameController@showGame");
-Route::post('playWord', "GameController@playWord");
+
+Route::group(['middleware' => ['App\Http\Middleware\checker']], function()
+{
+    Route::post('game/all', 'GameController@getAllGameDataJson');
+    Route::post('game/turn', 'GameController@getTurnJson');
+    Route::post('game/playWord', "GameController@playWordAjax");
+    Route::get('game/{game_id}', "GameController@showGame");
+    Route::get('games', "HomeController@games");
+   
+});

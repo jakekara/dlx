@@ -16,7 +16,7 @@ class AuthController extends Controller {
 	| authentication of existing users. By default, this controller uses
 	| a simple trait to add these behaviors. Why don't you explore it?
 	|
-	*/
+	*
 
 	use AuthenticatesAndRegistersUsers;
 
@@ -26,7 +26,7 @@ class AuthController extends Controller {
 	 * @param  \Illuminate\Contracts\Auth\Guard  $auth
 	 * @param  \Illuminate\Contracts\Auth\Registrar  $registrar
 	 * @return void
-	 */
+	 *
 	public function __construct(Guard $auth, Registrar $registrar)
 	{
 		$this->auth = $auth;
@@ -34,5 +34,11 @@ class AuthController extends Controller {
 
 		$this->middleware('guest', ['except' => 'getLogout']);
 	}
-
+    */
+    
+    public function login()
+    {
+            return \Socialize::with('facebook')->redirect();
+    }
+    
 }

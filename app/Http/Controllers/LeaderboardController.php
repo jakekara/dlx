@@ -2,7 +2,7 @@
 
 use Illuminate\Routing\Controllers;
 use DB;
-
+use Socialize;
 class LeaderboardController extends Controller
 {
     public function index()
@@ -10,6 +10,9 @@ class LeaderboardController extends Controller
         // get top 10 games
         $games = DB::table('games')->get();
         
-        return view('home.leaderboard', array('games'=>$games));
+        return view('home.leaderboard', array(
+            'games'=>$games
+            // , 'message'=>$user = Socialize::with('facebook')->user()->name
+        ));
     }
 }
