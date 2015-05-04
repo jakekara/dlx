@@ -15,7 +15,7 @@
             <?php if (Auth::check()): ?>
                 Welcome, <?= Auth::user()->name ;?>. Not you? <a href="/logout">logout</a>
             <?php else: ?> 
-                <a href="/login">Log in</a> to play!
+                <a href="login">Log in</a> to play!
             <?php endif ?>
         </div>
         <div id="message">
