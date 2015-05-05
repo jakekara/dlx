@@ -49,7 +49,7 @@ class HomeController extends Controller {
     public function userHome()
     {
         return view('user.home', array(
-            'games'=>Game::where('players', 'LIKE', '%:' . Auth::user()->id . ':');
+            'games'=>Game::where('players', 'LIKE', '%:' . Auth::user()->id . ':')
         ));
     }
     
