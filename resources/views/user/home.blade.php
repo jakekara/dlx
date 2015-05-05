@@ -22,7 +22,7 @@
             <?php foreach ($games as $game) : ?>
                 <?= $game->id; ?>
                 <?= $game->players; ?>
-            <?php end foreach ; ?>
+            <?php endforeach ; ?>
         <?php endif ; ?>
     </div>
 @stop
