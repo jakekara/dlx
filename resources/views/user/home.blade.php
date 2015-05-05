@@ -19,7 +19,10 @@
     <div>
         <h2>Your games</h2>
         <?php if (isset($games)) : ?>
-            <?php echo count($games); ?>
+            <?php foreach ($games as $game) : ?>
+                <?= $game->id; ?>
+                <?= $game->players; ?>
+            <?php end foreach ; ?>
         <?php endif ; ?>
     </div>
 @stop
