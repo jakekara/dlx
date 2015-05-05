@@ -2,7 +2,7 @@
 
 
 use Auth;
-use Game;
+use GameController;
 class HomeController extends Controller {
 
 	/*
