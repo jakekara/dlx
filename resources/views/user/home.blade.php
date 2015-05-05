@@ -19,7 +19,7 @@
     <div>
         <h2>Your games</h2>
         <?php if (isset($games)) : ?>
-            <?php var_dump($games); ?>
+            <?php echo count($games); ?>
         <?php endif ; ?>
     </div>
 @stop
