@@ -3,6 +3,7 @@
 
 use Auth;
 use GameController;
+use App\Game;
 class HomeController extends Controller {
 
 	/*
