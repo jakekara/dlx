@@ -18,6 +18,8 @@
     </div>
     <div>
         <h2>Your games</h2>
-        <p>Lorem ipsum</p>
+        <?php if isset($games) : ?>
+            var_dump($games);
+        <?php endif ; ?>
     </div>
 @stop
