@@ -9,7 +9,7 @@
             <tr>
                 <td>$game->words</td>
                 <td>$game->score</td>
-                <td>$game->ranking</td>
+                <td>$game->rank</td>
             </tr>
         <?php endforeach; ?>
     </table>

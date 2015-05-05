@@ -48,7 +48,9 @@ class HomeController extends Controller {
     
     public function userHome()
     {
-        return view('user.home');
+        return view('user.home', array(
+            'games'=>Game::where('players', 'LIKE', '%:' . Auth::user()->id . ':');
+        ));
     }
     
     public function goHome()

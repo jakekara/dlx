@@ -379,5 +379,20 @@ class GameController extends Controller
             ), JSON_PRETTY_PRINT);
         
     }
+    
+    public function getGamesJson()
+    {
+        if (!Auth::check())
+        {
+            return json_encode(array(
+                'status' => 'FAILURE',
+                'detailedStatus' => 'Not logged in.'
+            ));
+
+        }
+        
+        $id = Auth::user()->id;
+        
+    }
 }
 
