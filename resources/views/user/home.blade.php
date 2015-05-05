@@ -20,9 +20,7 @@
         <h2>Your games</h2>
         <?php if (isset($games)) : ?>
             <?php foreach ($games as $game) : ?>
-                <?= $game->id; ?>
-                <?= $game->players; ?>
-                <?php dd($game) ?>
+                <?= "TEST" ?>
             <?php endforeach ; ?>
         <?php endif ; ?>
     </div>
