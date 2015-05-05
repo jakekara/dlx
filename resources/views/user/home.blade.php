@@ -20,7 +20,7 @@
         <h2>Your games</h2>
         <?php if (isset($games))
         {
-            echo "your games: " ;
+            var_dump($games);
         }
         ?>
     </div>
