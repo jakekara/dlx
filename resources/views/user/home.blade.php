@@ -18,10 +18,10 @@
     </div>
     <div>
         <h2>Your games</h2>
-        <?php if (isset($games)) : ?>
-            <?php foreach ($games as $game) : ?>
-                <?= "TEST" ?>
-            <?php endforeach ; ?>
-        <?php endif ; ?>
+        <?php if (isset($games))
+        {
+            echo "your games: " ;
+        }
+        ?>
     </div>
 @stop
