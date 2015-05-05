@@ -392,6 +392,7 @@ class GameController extends Controller
         }
         
         $id = Auth::user()->id;
+        Game::where(
         
     }
 }
