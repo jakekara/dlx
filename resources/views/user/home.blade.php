@@ -22,6 +22,7 @@
             <?php foreach ($games as $game) : ?>
                 <?= $game->id; ?>
                 <?= $game->players; ?>
+                <?php dd($game) ?>
             <?php endforeach ; ?>
         <?php endif ; ?>
     </div>
