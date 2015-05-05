@@ -18,7 +18,7 @@
     </div>
     <div>
         <h2>Your games</h2>
-        <?php if isset($games) : ?>
+        <?php if (isset($games)) : ?>
             var_dump($games);
         <?php endif ; ?>
     </div>
