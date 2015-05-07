@@ -4,12 +4,14 @@ use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controllers;
 use DB;
 use Socialize;
+use App\Game;
+
 class LeaderboardController extends Controller
 {
     public function index()
     {
         // get top 10 games
-        $games = DB::table('games')->get();
+        $games = Game::orderBy('score', 'desc')->take(5)->get();
         
         return view('home.leaderboard', array(
             'games'=>$games

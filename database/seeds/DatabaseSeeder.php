@@ -3,8 +3,6 @@
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
 
-
-
 class DatabaseSeeder extends Seeder {
 
 	/**
@@ -19,6 +17,7 @@ class DatabaseSeeder extends Seeder {
 		// $this->call('UserTableSeeder');
         $this->call('WordsSeeder');
         $this->call('GamesSeeder');
+        $this->call('DictionarySeeder');
 
 	}
 

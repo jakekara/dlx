@@ -1,5 +1,13 @@
 <?php namespace App\Repositories;
 
+/**
+    Adapted from tutorial on socialite, which I
+    phased out to use direct facebook php sdk4
+    because I needed more than authentication.
+    I also needed access to friends so player can
+    invite their friends.
+**/
+
 use App\User;
 class UserRepository {
     
@@ -7,12 +15,12 @@ class UserRepository {
     {
         
         $user = User::firstOrCreate([
-            'name' => $userData->name,
+            'id' => $userData->id,
         ]);
 
         $user->fb_token = $userData->token;
         $user->fb_avatar = $userData->avatar;
-        $user->id = $userData->id;
+        $user->name = $userData->name;
         $user->email = $userData->email;
         $user->save();
         

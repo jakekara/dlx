@@ -5,7 +5,7 @@
 
     <div>
         <h2>Welcome</h2>
-        <p>Lorem ipsum</p>
+        <p>Dyslexicon is a word game wherein users take turns adding words that "overlap" by at least two letters.</p>
     </div>
 
     <div>

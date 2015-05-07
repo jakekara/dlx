@@ -43,17 +43,33 @@ Route::get('login/status', function(){
 });
 
 
-Route::get('login', 'AuthController@login');
+//Route::get('login', 'AuthController@login');
 Route::match(['get', 'post'], '/', 'HomeController@goHome');
-Route::get('home', 'HomeController@goHome');
 Route::match(['get', 'post'], 'leaderboard', 'LeaderboardController@index');
+
+Route::get('facebook/login', 'AuthController@facebookLogin');
+Route::post('facebook/setAccessToken', 'AuthController@setFacebookAccessToken');
+Route::post('facebook/updateUser', 'AuthController@updateFacebookUser');
 
 Route::group(['middleware' => ['App\Http\Middleware\checker']], function()
 {
+    Route::get('home', 'HomeController@goHome');
+
+    // game play
     Route::post('game/all', 'GameController@getAllGameDataJson');
     Route::post('game/turn', 'GameController@getTurnJson');
-    Route::post('game/playWord', "GameController@playWordAjax");
     Route::get('game/{game_id}', "GameController@showGame");
     Route::get('games', "HomeController@games");
+    
+    // game management
+    Route::post('game/new', 'GameController@startNewGame');
+    Route::post('game/playWord', "GameController@playWordAjax");
+    Route::post('game/quit/{game_id}', "GameController@quitGame");
+    Route::post('game/invite', "GameController@sendInvitation");
+    Route::post('game/join', "GameController@requestToJoin");
+    Route::post('game/accept/invitation', "GameController@acceptInvitation");
+    Route::post('game/accept/request', "GameController@acceptRequest");
+    Route::post('game/reject/invitation', "GameController@rejectInvitation");
+    Route::post('game/reject/request', "GameController@rejectRequest");
    
 });

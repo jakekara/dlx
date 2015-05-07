@@ -4,7 +4,14 @@
 
 use Closure;
 use Auth;
+use Session;
 
+use App\Library\FacebookHelper;
+
+/**
+    Make sure we have functioning user records
+    for pages that need them.
+**/
 
 class checker {
 
@@ -15,23 +22,18 @@ class checker {
 	 * @param  \Closure  $next
 	 * @return mixed
 	 */
+    
 	public function handle($request, Closure $next)
 	{
-        // TODO - Check for authentication or redirect
-        
-        if (!Auth::check()) //return $next($request)
-        
+        $fbHelper = new FacebookHelper;
+        $session = $fbHelper->getSession();
+        if ($session)
         {
-            // for now, pass through
             return $next($request);
         }
-
-        
-        return $next($request);
-
-        //return $next($request);
-        // otherwise, redirect user to login
-        //return "Not logged in";
-	}
-
+        else
+        {
+            return redirect("facebook/login");
+        }
+    }
 }

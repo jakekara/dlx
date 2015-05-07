@@ -41,5 +41,11 @@ class AuthenticateUser {
     {
         return $this->socialite->driver('facebook')->redirect();
     }
+    
+    
+    public function loginUserToApp()
+    {
+    }
+    
 }
 ?>

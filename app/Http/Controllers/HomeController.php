@@ -44,15 +44,15 @@ class HomeController extends Controller {
         
     public function guestHome()
     {
-        return view('guest.home');
+        return redirect('facebook/login');
     }
     
     public function userHome()
     {
-        dd (Auth::user()->id);
-        $games = Game::where('players', 'LIKE', '%:' . Auth::user()->id . ':%');
+        //dd (Auth::user()->id);
+        $games = json_encode(Game::where('players', 'LIKE', '%:' . Auth::user()->id . ':%')->get());
         return view('user.home', array(
-            'games'=>Game::where('players', 'LIKE', '%:' . Auth::user()->id . ':%')
+            'games'=>$games
         ));
     }
     

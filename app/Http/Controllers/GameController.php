@@ -1,7 +1,17 @@
 <?php namespace App\Http\Controllers;
 
+/**
+    GameController.php
+    by Jake Kara
+    jkara@g.harvard.edu
+    
+    Handle all viewing and interacting with games
+
+**/
+
 use App\Game;
 use App\Word;
+use App\DictionaryWord;
 //use Illuminate\Routing\Controllers;
 use Illuminate\Support\Facades\Request;
 use Input;
@@ -9,61 +19,84 @@ use DB;
 use Auth;
 use App\User;
 
-use Facebook\FacebookSession;
-use Facebook\FacebookRequest;
-use Facebook\Graphuser;
-use Facebook\FacebookRedirectLoginHelper;
+use App\Library\JsonResponseHelper;
+use App\Library\FacebookHelper;
 
 class GameController extends Controller
 {
-    
     /**
-        deprecated
-    **
-    public function getGame($game_id)
+        Remove players from friend list
+    **/
+    public function removePlayersFromList($players, $list)
     {
-        try 
+       
+        foreach($list as $key => $listee)
         {
-            $game = Gamme::find($game_id);
-
-                        if ($game === NULL || count($game) === 0)
+            foreach($players as $player)
             {
-                return "no such game";
+                if ($listee->id == $player["id"])
+                {
+                    unset($list[$key]);
+                }
             }
-            
-            
-            
-            return $game;
         }
-        catch (Exception $e)
-        {
-            return "getGame exception";
-        }
-    } **/
-    
+
+        return $list;
+    }
     
     /**
         Show a requested game as a player or spectator
     **/
     public function showGame($game_id)
     {
-        FacebookSession::setDefaultApplication(env('FB_APPID'), env('FB_APPSECRET'));
+        // find game
+        $game = Game::find($game_id);
 
-        $session = new FacebookSession(Auth::user()->fb_token);
-        $request = new FacebookRequest(
-          $session,
-          'GET',
-          '/'.Auth::user()->id.'/invitable_friends'
-        );
-        $response = $request->execute();
-        $graphObject = $response->getGraphObject();
+                
+        // load friends list to populate "invite" field
+        $fbHelper = new FacebookHelper;
+        $friendList = $fbHelper->getFriends();
+        $gameFriendList = $fbHelper->getGameFriends();
+        $currentPlayers = $game->getPlayersArray();
         
-        dd($response);
+        if ($gameFriendList != null)
+        {
+            $gameFriendList = $gameFriendList->getProperty('data');
+            if ($gameFriendList != null)
+            {
+                $gameFriendList = $gameFriendList->asArray();
+                
+                // remove all current players from list 
+                $gameFriendList = $this->removePlayersFromList($currentPlayers, $gameFriendList);
+            }
+            else
+            {
+                // at least send an empty array
+                $gameFriendList = array();
+                
+                
+            }
+        }
         
+        if ($friendList != null)
+        {
+            $friendList = $friendList->getProperty('data');
+            if ($friendList != null)
+            {
+                $friendList = $friendList->asArray();
+                
+                // remove all current players
+                $friendList = $this->removePlayersFromList($currentPlayers, $friendList);
+            }
+            else
+            {
+                //at least send an empty array
+                $friendList = array();
+            }
+        }
         try 
         {
-            $game = Game::find($game_id);
-            $words = $game->getWordsInOrder();
+            $wordList = $game->getWordsInOrder();
             $players = $game->players;
             
             if ($game === NULL || count($game) === 0)
@@ -73,26 +106,75 @@ class GameController extends Controller
                  ));
             }
             
+            // get invited friends
+            $invitedFriends = $game->getInvites();
+            $requestedFriends = $game->getRequests();
             // if user is autheticated, and user's id
             // is in list of active players,
-            // load the game as 
-            // load view 
+            // load the game as a player
             if (Auth::check() && strstr($players, ":" . Auth::user()->id .":"))
             {
-                return view('game.player', array(
+                
+                return view('user.game', array(
                     'game'=>$game,
                     'game_id'=>$game_id,
-                    'words'=> $words,
-                    'message'=>''
-                                        
+                    'wordList'=> $wordList,
+                    'message'=>'',
+                    'friendList'=>json_encode($friendList),
+                    'appFriendsList'=>json_encode($gameFriendList),
+                    'joinRequestsList' =>   $requestedFriends,
+                    'invitedFriendsList' => $invitedFriends,
+                    'currentPlayers' => $currentPlayers
+                    
                 ));
 
             }
             // otherwise, load spectator view of game
             else 
             {
-                return view ('game.spectator', array(
-                    'words'=> $words
+                $invited = 'NO';
+                
+                /*
+                // determine if youre on the invite list
+                foreach (json_decode($invitedFriends) as $invitee)
+                {
+                    if ($invitee->id == Auth::user()->id)
+                    {
+                        $invited = 'YES';
+                        break;
+                    }
+                }
+                                // determine if youre on the invite list
+                foreach (json_decode($invitedFriends) as $requestee)
+                {
+                    if ($requestee->id == Auth::user()->id)
+                    {
+                        $requested = 'YES';
+                        break;
+                    }
+                }
+                */
+                
+                // determine if user has requested to join the game
+                // or has been invited.
+                
+                $requested = 'NO';                
+                if ($game->isRequesting(Auth::user()->id))
+                {
+                    $requested = "YES";
+                }
+                $invited = 'NO';
+                
+                if ($game->isInvited(Auth::user()->id))
+                {
+                    $invited = "YES";
+                }
+                
+                return view ('guest.game', array(   
+                    'wordList' => $wordList,
+                    'game_id'=>$game_id,
+                    'invited' => $invited,
+                    'requested' => $requested
                 ));
             }
 
@@ -106,7 +188,58 @@ class GameController extends Controller
     }
     
     /**
-        Add a word to the database
+        Reject a request to join a game
+    **/
+    public function rejectRequest()
+    {
+        
+        $jsonHelper = new JsonResponseHelper;
+        if (!Input::has('game_id') || ! Input::has('user_id'))
+        {
+            return $jsonHelper->failJson("Bad input");
+        }
+        
+        $game = Game::find(Input::get('game_id'));
+        if ($game == NULL)
+        {
+            return $jsonHelper->failJson("No game found.");
+        }
+        if ($game->rejectRequest(Input::get('user_id')))
+        {
+            return $jsonHelper->succeedJson("request rejected.");
+        }
+        $jsonHelper->failJson("Failed to reject request.");
+    }
+    
+    
+    /**
+        Reject an invitation to join a game
+    **/
+    public function rejectInvitation()
+    {
+        $jsonHelper = new JsonResponseHelper;
+
+        if (!Input::has('game_id'))
+        {
+            return $jsonHelper->failJson("Bad input");
+        }
+        
+        $game = Game::find(Input::get('game_id'));
+        if ($game == NULL)
+        {
+            return $jsonHelper->failJson("No game found.");
+        }
+        
+        if ($game->rejectInvite())
+        {
+            return $jsonHelper->succeedJson("Rejected invitation");
+        }
+        
+        return $jsonHelper->failJson("Failed to reject invitation");
+    }
+    
+    /**
+        Add a word to the game
     **/
     private function addWord($position, $overlap)
     {        
@@ -127,7 +260,7 @@ class GameController extends Controller
                                
             // add the word
             $newWord = new Word;
-            $newWord->word =  Input::get('word');
+            $newWord->word =  strtolower(Input::get('word'));
             $newWord->game_id = Input::get('game_id');
             $newWord->position = $position;
             $newWord->save();
@@ -138,10 +271,14 @@ class GameController extends Controller
         }
     }
     
-    /** Play a word and turn word list **/
+    /** 
+        Play a word and turn word list 
+    **/
     public function playWordAjax()
     {
                 
+        $jsonHelper = new JsonResponseHelper;
+        
         // determine if game exists
         $game = Game::find(Input::get('game_id'));
         if ( $game == NULL)
@@ -154,12 +291,6 @@ class GameController extends Controller
         }
         
         // get word list sorted by position
-        /*
-        $words = $game->words->sortBy(function($role)
-        {
-            return $role->position;
-        });;
-        */
         $words = $game->getWordsInOrder();
         
         // determine if there is an input word
@@ -180,6 +311,7 @@ class GameController extends Controller
                 "detailedStatus" => "Word must contain only letters."
             ));
         }
+    
         
         // determine if user is authenticated
         if (!Auth::check())
@@ -190,6 +322,8 @@ class GameController extends Controller
             ));
         }
         
+        
+        
         // determine if it's the user's turn
         else if (!Game::find(Input::get('game_id'))->turn == Auth::user()->id)
         {
@@ -199,11 +333,21 @@ class GameController extends Controller
             ));
         }
         
+        // determine if it's in the dictionary
+        $inDictionary = DictionaryWord::where('word', 'LIKE', strtolower($word))->first();
+        if ($inDictionary == null)
+        {
+            return $jsonHelper->failJson("Not a dictionary word");
+        }
+                                                   
         // determine if there are any words played yet
         if (count($words) == 0)
         {
             // add word
-            return "Add first word";
+            $this->addWord(0, 1);
+            // go to next player
+            $game->nextTurn();
+            return  $jsonHelper->succeedJson("Added first word.");
         }
         
         
@@ -220,8 +364,10 @@ class GameController extends Controller
             // add word to beginning
             $position = $firstWord->position - 1;
             $this->addWord($position, $overlap);
+            // go to next player
+            $game->nextTurn();
             $game = Game::find(Input::get('game_id'));
-
+    
             // return json
             return json_encode(array(
                 "status" => "SUCCESS",
@@ -236,6 +382,8 @@ class GameController extends Controller
             {
                 $position = $lastWord->position + 1;
                 $this->addWord($position, $overlap);
+                // go to next player
+                $game->nextTurn();
                 $game = Game::find(Input::get('game_id'));
 
                 return json_encode(array(
@@ -270,11 +418,113 @@ class GameController extends Controller
         
     }
     
+  
     /**
+        Invite someone to join a game
+    **/
+    public function sendInvitation()
+    {
+        $jsonHelper = new JsonResponseHelper;
+        $playerId = Input::get('player_id');
+        $gameId = Input::get('game_id');
+        $game = Game::find($gameId);
+        
+        if ($game === NULL)
+        {
+            return $jsonHelper->fail("No game found.");
+        }
+        
+        if ($game->addInvite($playerId))
+        {
+            return $jsonHelper->succeedJson("Invitation sent.");
+        }
+        
+        return $jsonHelper->failJson("Failed to send invitation");
+    }
+    
+    /**
+        Send a request to join a game
+    **/
+    public function requestToJoin()
+    {
+        $jsonHelper = new JsonResponseHelper;
+        
+        $gameId = Input::get('game_id');
+        $game = Game::find($gameId);
+        
+        if ($game === NULL)
+        {
+            return $jsonHelper->fail("No game found.");
+        }
+        
+        if ($game->addRequest())
+        {
+            return $jsonHelper->succeedJson("Sent request to join game.");
+        }
+        
+        return $jsonHelper->failJson("Failed to send request to join game " . $gameId . ".");
+
+    }
+    
+    /**
+        Accept a request to join a game
+    **/
+    public function acceptRequest ()
+    {
+        $jsonHelper = new JsonResponseHelper;
+        
+        if (!Input::has('player_id') || !Input::has('game_id'))
+        {
+            return $jsonHelper->failJson("Bad input");
+
+        }
+        
+        $playerId = Input::get('player_id');
+        $gameId = Input::get('game_id');
+        $game = Game::find($gameId);
+        
+        if ($game === NULL)
+        {
+            return $jsonHelper->fail("No game found.");
+        }
+        
+        if ($game->acceptRequest($playerId))
+        {
+            return $jsonHelper->succeedJson("Accepted request by player to join.");
+        }
+        
+        return $jsonHelper->failJson("Failed to accept player " . $playerId);
+        
+    }
+    
+    /**
+        Accept an invitation to join a game
+    **/
+    public function acceptInvitation()
+    {
+        $jsonHelper = new JsonResponseHelper;
+        $gameId = Input::get('game_id');
+        $game = Game::find($gameId);
+        
+        if ($game === NULL)
+        {
+            return $jsonHelper->fail("No game found.");
+        }
+        
+        if ($game->acceptInvite())
+        {
+            return $jsonHelper->succeedJson("Accepted invitation");
+        }
+        
+        
+        return $jsonHelper->failJson("Failed to accept invitation");
+    }
+    
+    
+     /**
         determine if two words can be added together
         by appending $second on to first
     **/
-    
     protected function canAppend($first, $second)
     {
         // determine the max number of letters that could overlap
@@ -367,8 +617,6 @@ class GameController extends Controller
         // get userList - real names
         $game = Game::find(Input::get('game_id'));
         
-        
-        
         return json_encode(array(
                 'status' => 'SUCCESS',
                 'wordList' => $game->getWordsInOrderAsArray(),
@@ -392,8 +640,79 @@ class GameController extends Controller
         }
         
         $id = Auth::user()->id;
-        Game::where(
         
     }
+    
+    /**
+        Start a new game
+    **/
+    public function startNewGame()
+    {
+     
+        $jsonHelper = new JsonResponseHelper();
+        if (!Auth::check())
+        {
+            $jsonHelper->failJson("Not logged in!");
+        }
+        
+        $newGame = new Game;
+        
+        $newGame->active = ":" . Auth::user()->id . ":";
+        $newGame->players = ":" . Auth::user()->id . ":";
+        $newGame->turn = Auth::user()->id ;
+        $newGame->score = 0;
+        $newGame->save();
+        
+        $jsonHelper->returnJson("SUCCESS", array(
+            "newGameId" => $newGame->id
+        ));
+        
+    }
+    
+    /**
+        Quit a game (remove user from active players list)
+    **/
+    public function quitGame($gameId)
+    {
+        $jsonHelper = new JsonResponseHelper();
+        if (!Auth::check())
+        {
+            return $jsonHelper->failJson("Not logged in!");
+        }
+    
+        // padd user id colons
+        $paddedUserId = ":" . Auth::user()->id . ":";
+        
+        // load game
+        $game = Game::where('players', 'LIKE', "%:" . Auth::user()->id . ":%")
+            ->where('id', '=', $gameId)->first();
+        
+        // fail if we didn't find a game
+        if ($game == NULL)
+        {
+            return $jsonHelper->failJson("No such game.");
+        }
+        
+        // see if the user is a player
+        $players = $game->players;
+        
+        // load active users string
+        if (strpos($players, $paddedUserId) === false)
+        {
+            return "'" . $paddedUserId . "' not in player list: '" . $players . "'";
+            // user not in active players list
+            return $jsonHelper->failJson("You're not a player." . $game->players);
+        }
+
+        // delete player from active player list
+        $game->players = str_replace($paddedUserId, "", $game->players);
+        $game->save();
+        return $jsonHelper->succeedJson("Deleted user " . Auth::user()->id . " from active players list.");
+
+        // TO PONDER -- Should games ever be entirely deleted from database?
+        // perhaps if they have no words and the only player is the one deleting the game.
+    }
+    
+    
 }
 

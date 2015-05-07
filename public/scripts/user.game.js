@@ -18,10 +18,70 @@ $(function(){
     
     // set handler for playWord button
     $("#playWord").submit(userGameView.playWord);
-        
+
+    // set handler for accept and request links
+    $(".acceptLink").click(userGameView.acceptRequest);
+    $(".rejectLink").click(userGameView.rejectRequest);
+    $(".inviteAppFriendButton").click(userGameView.inviteAppFriend);
+    $(".inviteFriendToDyslexButton").click(userGameView.inviteFriendToDyslex);
     userGameView.refresh();
 });
 
+/**
+    dump the result of an ajax operation
+**/
+userGameView.dumpResult = function(result)
+{
+    console.log(result);
+}
+/**
+    accept a request to join
+**/
+userGameView.acceptRequest = function(e)
+{  
+    e.preventDefault();
+    console.log("Accepting request to join");
+    userId = e.target.id.replace("accept_", "");
+    $.post( "/game/accept/request", {player_id: userId, game_id: game_id, _token : csrf_token }, userGameView.dumpResult);
+    return false;
+    
+}
+
+/**
+    reject a request to join
+**/
+userGameView.rejectRequest = function(e)
+{
+    
+    e.preventDefault();
+    userId = e.target.id.replace("reject_", "");
+     $.post( "/game/reject/request", {user_id: userId, game_id: game_id, _token : csrf_token }, userGameView.dumpResult);
+    return false;
+}
+
+/**
+    invite a friend to join game
+**/
+userGameView.inviteAppFriend = function(e)
+{
+    e.preventDefault();
+    userId = e.target.id.replace("inviteAppFriend_", "");
+    
+    console.log("Inviting app friend " + userId);
+    $.post( "/game/invite", {player_id: userId, game_id: game_id, _token : csrf_token }, userGameView.dumpResult);
+    return false;
+}
+
+/**
+    inivite a friend to join app
+**/
+userGameView.inviteFriendToJoinDyslex = function (e)
+{
+    e.preventDefault();
+    userId = e.target.id.replace("inviteToDyslex_", "");
+    console.log ("Inviting " + $userId + " to join Dyslexicon");
+    return false;
+}
 
 /**
     attempt to play a word
@@ -108,6 +168,19 @@ userGameView.result = function (result)
         $("#turn").html(robj.turnName);
     }
     
+    // update friend list if we have it
+    if (typeof(robj.friendList) != 'undefined')
+    {
+        console.log("got Friends List");
+        
+        $friendsListHtml = "<ul>";
+        for (i = 0; i < robj.friendList.length; i++)
+        {
+            $friendsListHtml += "<li>" + robj.friendList[i] + "</li>";
+        }
+        $friendsListHtml += "</ul>";
+    }
+    
     // update word list if we have it
     if (typeof(robj.wordList) != 'undefined')
     {
@@ -134,6 +207,7 @@ userGameView.result = function (result)
     {
         $("#score").html(robj.score);
     }
+    
     
     console.log("-------------------");
     

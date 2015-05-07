@@ -15,7 +15,7 @@
         <?php foreach ($games as $game):?>
             <tr>
                 <td><?= $game->score ?></td>
-                <td>Dyslexicondominium....</td>
+                <td><a href="/game/<?= $game->id ?>">Dyslexicondominium....</a></td>
                 <td><?= $game->players ?></td>
             </tr>
         <?php endforeach; ?>
