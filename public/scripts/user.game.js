@@ -23,7 +23,7 @@ $(function(){
     $(".acceptLink").click(userGameView.acceptRequest);
     $(".rejectLink").click(userGameView.rejectRequest);
     $(".inviteAppFriendButton").click(userGameView.inviteAppFriend);
-    $(".inviteFriendToDyslexButton").click(userGameView.inviteFriendToDyslex);
+    $(".inviteFriendToDyslexiconButton").click(userGameView.inviteFriendToDyslexicon);
     userGameView.refresh();
 });
 
@@ -75,12 +75,54 @@ userGameView.inviteAppFriend = function(e)
 /**
     inivite a friend to join app
 **/
-userGameView.inviteFriendToJoinDyslex = function (e)
+userGameView.inviteFriendToDyslexicon = function (e)
 {
     e.preventDefault();
-    userId = e.target.id.replace("inviteToDyslex_", "");
-    console.log ("Inviting " + $userId + " to join Dyslexicon");
+    userId = e.target.id.replace("inviteFriendToDyslexicon_", "");
+    $.post("/invite/" + userId, { _token: csrf_token }, userGameView.inviteToAppResult);
+    console.log ("Inviting " + userId + " to join Dyslexicon");
     return false;
+}
+
+/**
+    Handle json from invite to app request
+**/
+userGameView.inviteToAppResult = function(result)
+{
+    userGameView.dumpResult(result);
+    robj = JSON.parse(result);
+    
+    console.log(robj);
+    
+    if (robj.status == "SUCCESS")
+    {
+        console.log("Successful invitation")
+        if (typeof(robj.divToDelete)!= 'undefined')
+        {
+            divToDelete = "#" + robj.divToDelete;
+            console.log ("deleting " + divToDelete);
+            $(divToDelete).hide();
+            
+            // now to send the actual invitation
+            if (typeof(robj.friendId) != 'undefined')
+            {
+                /* disable while testing
+                FB.ui({
+                    method: 'apprequests',
+                    message: 'Come test out Jake\'s CS50 project, Dyslexicon. It\'s still being developed, and you\'re only being '
+                    + 'invited to test out the Facebook invite integration. But feel free to noodle around. Things will stop and '
+                    + 'start working as I continue to code.',
+                    to: robj.friendId
+                  }, 
+                  userGameView.dumpResult
+                );
+                */
+            }
+            
+            return;
+        }
+        console.log("Failed invitation");
+    }
 }
 
 /**

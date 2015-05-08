@@ -11,6 +11,7 @@
 
 use App\Game;
 use App\Word;
+use App\AppInvite;
 use App\DictionaryWord;
 //use Illuminate\Routing\Controllers;
 use Illuminate\Support\Facades\Request;
@@ -671,6 +672,9 @@ class GameController extends Controller
     
     /**
         Quit a game (remove user from active players list)
+        
+        TODO - eventually rewrite this to abstract Game model's
+        quit() method for better MVC-ness
     **/
     public function quitGame($gameId)
     {
@@ -713,6 +717,26 @@ class GameController extends Controller
         // perhaps if they have no words and the only player is the one deleting the game.
     }
     
+    
+    public function inviteToApp($user_id)
+    {
+        $jsonHelper = new JsonResponseHelper;
+        
+        $invitation = AppInvite::where('facebook_id', '=', $user_id)->first();
+        if ($invitation == null)
+        {
+            $invitation = new AppInvite;
+            $invitation->facebook_id = $user_id;
+            $invitation->save();
+            return $jsonHelper->returnJson("SUCCESS", array(
+                'divToDelete' => 'inviteFriendToDyslexiconListItem_' . $user_id,
+                'detailedStatus' => 'Friend request sent',
+                'friendId' => $user_id,
+                'appId' => env('FB_APPID')
+            ));
+        }
+        return $jsonHelper->failJson("Cannot send request. Friend has already been invited");
+    }
     
 }
 

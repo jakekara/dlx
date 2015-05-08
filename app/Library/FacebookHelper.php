@@ -1,5 +1,6 @@
 <?php namespace App\Library;
 
+use App\AppInvite;
 /**
     Use for facebook interactions for the current
     logged in user
@@ -15,10 +16,13 @@ class FacebookHelper
     
     public function getSession()
     {
+        // ensure authentication
         if (!Auth::check())
         {
+           
             return null;
         }
+        
         
         // check database for token
         $token = Auth::user()->fb_token;
@@ -68,10 +72,23 @@ class FacebookHelper
 
         try 
         {
+            
+            $invitedFriends = AppInvite::all();
+            
+            $excludes = "[";
+            if ($invitedFriends != null)
+            {
+                foreach ($invitedFriends as $invitee)
+                {
+                    $excludes .= '"' . $invitee->facebook_id . '",';
+                }
+            }
+            $excludes .= "]";
+            
             $request = new FacebookRequest(
                 $session,
                 'GET',
-                '/me/invitable_friends'
+                '/me/invitable_friends?excluded_ids=' . $excludes
                 );
 
             $response = $request->execute();

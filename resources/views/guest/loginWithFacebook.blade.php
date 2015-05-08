@@ -1,6 +1,6 @@
 @extends('layouts.master')
 @section('page_js')
-    <script type="application/javascript"> var appId = <?= $appId ?>; </script>
+    <script type="application/javascript"> var appId = <?= env('FB_APPID'); ?>; </script>
     <script type="application/javascript"> var csrf_token = "{{ csrf_token() }}"</script>
     <script type="application/javascript" src="/scripts/guest.loginWithFacebook.js"></script>
 @stop

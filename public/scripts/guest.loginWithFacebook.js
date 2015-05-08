@@ -20,10 +20,6 @@ $(function(){
     
     // hide the login status, which is redundant on this page
     $("#loginStatus").hide();
-
-    console.log("hiding login status");
-    
-
     
     /**
     function checkLoginState() {
@@ -32,6 +28,7 @@ $(function(){
         });
     }**/
 
+    
     window.fbAsyncInit = function() {
     FB.init({
     appId      : appId,
@@ -89,23 +86,25 @@ loginWithFacebook.statusChangeCallback = function (response) {
         console.log ("Setting access token to " + response.authResponse.accessToken);
         console.log ("Your id is " + response.authResponse.userID);
         
-        
+        $("#status").html("Talking to Facebook. This shouldn't take long...");
         // send only facebook id and access token. we will not have name in response at this point
         $.post( "/facebook/updateUser", {facebookAccessToken: response.authResponse.accessToken, _token : csrf_token, facebookId: response.authResponse.userID}, loginWithFacebook.result); 
         
-        loginWithFacebook.testAPI();
     } 
     else if (response.status === 'not_authorized') 
     {
         // The person is logged into Facebook, but not your app.
         document.getElementById('status').innerHTML = 'Please log ' +
-            'into this app.';
+            'in to this app.';
+        $("#fbLoginButton").show();
+
     } else 
     {
         // The person is not logged into Facebook, so we're not sure if
         // they are logged into this app or not.
         document.getElementById('status').innerHTML = 'Please log ' +
-            'into Facebook.';
+            'in to Facebook.';
+        $("#fbLoginButton").show();
     }
 }
 
@@ -128,26 +127,43 @@ loginWithFacebook.testAPI = function() {
     FB.api('/me', function(response) {
     
         // send id and name. we won't have access token here.
-        $.post( "/facebook/updateUser", { _token : csrf_token, facebookId: response.id, facebookName: response.name }, loginWithFacebook.result); 
+        $.post( "/facebook/updateUser", { _token : csrf_token, facebookId: response.id, facebookName: response.name }, loginWithFacebook.finish); 
         console.log(response);
         console.log('Successful login for: ' + response.name);
         
-        document.getElementById('status').innerHTML =
-        'You are logged in as ' + response.name + '!'
-        + " Now you can <a href='/home'>Start playing!</a>";
-    
-        $("#fbLoginButton").hide();
+       
 
     });
 
 
 
-    }
+}
     
-    loginWithFacebook.result = function(data) {
-        console.log("==RESULT==");
+loginWithFacebook.result = function(data) {
+    console.log("==RESULT==");
 
-        console.log(data);
+    console.log(data);
+
+    console.log("==========");
+    
+    loginWithFacebook.testAPI();
+
+}
+
+loginWithFacebook.finish = function (response)
+{
+    console.log("finishing");
+    console.log(response);
+    //robj = JSON.parse(response);
+    
+    if (response.status == "SUCCESS")
+    {            
         
-        console.log("==========");
+       $("#status").html(
+            'You are logged in as ' + response.facebook_name + '.'
+            + " Now you can <a href='/home'>Start playing!</a>"
+       ).fadeIn(400);
+
+        $("#fbLoginButton").hide();
     }
+}

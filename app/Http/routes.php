@@ -71,5 +71,8 @@ Route::group(['middleware' => ['App\Http\Middleware\checker']], function()
     Route::post('game/accept/request', "GameController@acceptRequest");
     Route::post('game/reject/invitation', "GameController@rejectInvitation");
     Route::post('game/reject/request', "GameController@rejectRequest");
+    
+    //invite friend to app
+    Route::post('invite/{user_id}', "GameController@inviteToApp");
    
 });

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Auth;
 use Input;
 use App\User;
+use Response;
 
 use App\LaravelFacebookRedirectLoginHelper;
 use App\Library\JsonResponseHelper;
@@ -75,10 +76,15 @@ class AuthController extends Controller {
         ));
 
         $user->id = $facebookId;   
+
+        $infoUpdated = 1;
+        
         $user->save();
         
-        
-
+        if (!Auth::check())
+        {
+            Auth::loginUsingId($facebookId);
+        }
 
         // update name if we have it
         if (Input::has('facebookName'))
@@ -88,8 +94,10 @@ class AuthController extends Controller {
             {
                 return $jsonHelper->failJson("Invalid name");
             }
+            $infoUpdated += 2;
 
             $user->name = $facebookName;
+            $user->save();
         }
         
         // set facebook access token
@@ -99,20 +107,47 @@ class AuthController extends Controller {
             // ensure value isn't null
             if ($facebookAccessToken == null)
             {
-                return $jsonHelper->failJson("Invalid access token");
+                if (strlen($facebookAccessToken > 0))
+                {
+                    return $jsonHelper->failJson("Invalid access token");    
+                }
+                
             }
-            $user->fb_token = $facebookAccessToken;
-        }
-        
-        // save user
-        $user->save();
-        
+            
+            $infoUpdated += 4;
+            Auth::user()->fb_token = $facebookAccessToken;
+            Auth::user()->save();
+        }        
         
         // log the user in to the system;
-        Auth::login($user);
+        //Auth::login($user);
         
-        
-        return $jsonHelper->succeedJson('Updated user info');
+        if (Auth::check())
+        {
+            $infoUpdated += 10;
+        }
+
+        if ($facebookName != null)
+        {
+            // this is an attempt to solve persistance problem 
+            // that makes returning regular json_encode data
+            // not persist, which is critical for login to work
+            return Response::json(array("status"=>"SUCCESS",
+            "detailedStatus" => 'Updated user info ' . $infoUpdated,
+                'facebook_name' => $facebookName
+            ));
+        }
+        else if ($facebookAccessToken != null)
+        {
+            return array("status"=>"SUCCESS",
+                 "detailedStatus" => 'Updated user info ' . $infoUpdated,
+                'facebook_token' => $user->fb_token
+            );
+        }
+        return array(
+            "status" => "SUCCESS",
+            "detailedStatus" => 'Updated user info ' . $infoUpdated
+        );
     }
     
 }

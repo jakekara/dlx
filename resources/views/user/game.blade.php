@@ -47,7 +47,7 @@
                 <h2>Invite friends to Dyslexicon</h2>
                 <p>Dyslexicon is better with friends. Invite your friends to join. Once they do you can invite them to games.</p>
                 <?php foreach (json_decode($friendList) as $friend) :?>
-                    <li><a href="#"><img class="img-rounded" src='<?= $friend->picture->data->url ?>' />Invite <?= $friend->name ?></a></li>
+                    <li id='inviteFriendToDyslexiconListItem_<?= $friend->id ?>'><a class="inviteFriendToDyslexiconButton" id="inviteFriendToDyslexicon_<?= $friend->id ?>" href="#"><img alt="Invite <?= $friend->name ?>" class="img-rounded" src='<?= $friend->picture->data->url ?>' />Invite <?= $friend->name ?></a></li>
                 <?php endforeach ; ?>
             <?php endif ;?>
             

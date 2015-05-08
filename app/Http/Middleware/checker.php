@@ -27,6 +27,7 @@ class checker {
 	{
         $fbHelper = new FacebookHelper;
         $session = $fbHelper->getSession();
+        
         if ($session)
         {
             return $next($request);
