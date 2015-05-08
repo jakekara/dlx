@@ -45,18 +45,20 @@ Route::get('login/status', function(){
 
 //Route::get('login', 'AuthController@login');
 Route::match(['get', 'post'], '/', 'HomeController@goHome');
+Route::match(['get', 'post'], "sorry", "HomeController@saySorry"); 
+Route::match(['get', 'post'], "sorry/{reason}", "HomeController@sayWhatYoureSorryFor"); 
+
 Route::match(['get', 'post'], 'leaderboard', 'LeaderboardController@index');
 
 Route::get('facebook/login', 'AuthController@facebookLogin');
 Route::post('facebook/setAccessToken', 'AuthController@setFacebookAccessToken');
 Route::post('facebook/updateUser', 'AuthController@updateFacebookUser');
-
 Route::group(['middleware' => ['App\Http\Middleware\checker']], function()
 {
     Route::get('home', 'HomeController@goHome');
 
     // game play
-    Route::post('game/all', 'GameController@getAllGameDataJson');
+    Route::post('game/all', 'GameController@getAllGameData');
     Route::post('game/turn', 'GameController@getTurnJson');
     Route::get('game/{game_id}', "GameController@showGame");
     Route::get('games', "HomeController@games");

@@ -51,7 +51,7 @@ class Game extends Model
     public function getRequests()
     {   
         $rawFriends = $this->user_requests;
-        $requests = $this->colonListAsJson($rawFriends);
+        $requests = $this->colonListAsArray($rawFriends);
         
         return $requests;
     }
@@ -61,7 +61,10 @@ class Game extends Model
     public function getInvites()
     {
         $rawFriends = $this->user_invites;
-        $invites = $this->colonListAsJson($rawFriends);
+        
+        $invites = $this->colonListAsArray($rawFriends);
+        
+        
         return $invites;
     }
     

@@ -8,7 +8,6 @@
 
 var userGameView = userGameView || {};
 
-
 /**
     run when document is loaded
 **/
@@ -68,8 +67,20 @@ userGameView.inviteAppFriend = function(e)
     userId = e.target.id.replace("inviteAppFriend_", "");
     
     console.log("Inviting app friend " + userId);
-    $.post( "/game/invite", {player_id: userId, game_id: game_id, _token : csrf_token }, userGameView.dumpResult);
+    $.post( "/game/invite", {player_id: userId, game_id: game_id, _token : csrf_token }, userGameView.inviteAppFriendResult);
     return false;
+}
+
+/** 
+    handle result of invite
+**/
+userGameView.inviteAppFriendResult = function (result)
+{
+    userGameView.dumpResult(result);
+    if (result.status == 'SUCCESS')
+    {
+        $("#inviteAppFriend_" + result.playerId).html("Invitation sent to " + result.playerName);
+    }
 }
 
 /**
@@ -137,7 +148,7 @@ userGameView.playWord = function(event)
  
     
     // send AJAX request
-    $.post( "playWord", $( "#playWord" ).serialize(), userGameView.playWordResult );
+    $.post( "playWord", $( "#playWord" ).serialize(), userGameView.result );
     
     // clear text field
     $("#wordInput").val("");
@@ -168,7 +179,8 @@ userGameView.result = function (result)
     console.log(result);
     
     // parse return text as object
-    var robj = JSON.parse(result);
+    //var robj = JSON.parse(result);
+    var robj = result;
     
     // if we didn't get any response, return 
     if (typeof(robj) == 'undefined')
@@ -234,6 +246,20 @@ userGameView.result = function (result)
         wordListHtml += "</ul>";
         
         $("#wordList").html(wordListHtml);
+        
+        $("#glom").html(masterScript.wordListToGlomHtml(robj.wordList));
+        $(".glomItem").hover(function()
+        {
+            $(this).hover(function()
+            {
+                $(this).css("font-size", "200%");
+            }, function()
+            {
+                $(this).css("font-size", "50%");
+            });
+                          
+        });
+
         $("#wordCount").html(wordList.length);
     }
     
@@ -250,6 +276,35 @@ userGameView.result = function (result)
         $("#score").html(robj.score);
     }
     
+    // rewrite invites list
+    // modify #invitesList
+    if (typeof(robj.invites) != 'undefined')
+    {
+        invitesListHtml = "";
+        for (i = 0; i < robj.invites.length; i++)
+        {
+            invitesListHtml = invitesListHtml +
+                '<li><a class="inviteAppFriendButton" id="inviteAppFriend_' + robj.invitesList[i].id + '">Invite ' + robj.invitesList[i].name + '></a></li>';
+        }
+       $("#invitesList").html(invitesListHtml);
+    }
+    
+    // rewrite requests list
+    if (typeof(robj.requestsList) != 'undefined')
+    {
+        requestsListHtml = "";
+   
+        for (i = 0; i < robj.requestsList.length; i++)
+        {
+            requestsListHtml = requestsListHtml + 
+                "<li>" + 
+                robj.requestsList[i].name +
+                '<a class="acceptLink" id="accept_' + robj.requestsList[i].id + '" href="#">Accept</a> | ' + 
+                '<a class="rejectLink" id="reject_' + robj.requestsList[i].id + '" href="#">Reject</a>' + 
+                "</li>";
+        }
+        $("#requestsListHtml").html(requestsListHtml);
+    }
     
     console.log("-------------------");
     

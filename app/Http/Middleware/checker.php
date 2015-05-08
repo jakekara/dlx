@@ -5,9 +5,8 @@
 use Closure;
 use Auth;
 use Session;
-
+//use Illuminate\Http\Request;
 use App\Library\FacebookHelper;
-
 /**
     Make sure we have functioning user records
     for pages that need them.
@@ -26,6 +25,9 @@ class checker {
 	public function handle($request, Closure $next)
 	{
         $fbHelper = new FacebookHelper;
+        // TODO verify request is coming from facebook
+
+        // verify facebook session        
         $session = $fbHelper->getSession();
         
         if ($session)

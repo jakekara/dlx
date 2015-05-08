@@ -11,8 +11,10 @@ use Input;
 use App\User;
 use Response;
 
+// using javascript now to authenticate
 use App\LaravelFacebookRedirectLoginHelper;
 use App\Library\JsonResponseHelper;
+use App\Library\FacebookHelper;
 
 class AuthController extends Controller {
 
@@ -109,10 +111,35 @@ class AuthController extends Controller {
             {
                 if (strlen($facebookAccessToken > 0))
                 {
-                    return $jsonHelper->failJson("Invalid access token");    
+                    return $jsonHelper->failJson("Invalid access token");
+                    
                 }
                 
             }
+            
+            // try to extend the access token
+            // get new session
+            $fbHelper = new FacebookHelper;
+            $session = $fbHelper->getSessionWithToken($facebookAccessToken);
+            // try to extend token
+            
+            if ($session)
+            {    
+                $checkAccessToken = $session->getAccessToken();
+                if ($checkAccessToken == $facebookAccessToken)
+                {
+                    $longLivedAccessToken = $checkAccessToken->extend();
+                    if ($longLivedAccessToken != NULL)
+                    {
+                        if (strlen($longLivedAccessToken) > 5)
+                        {
+                            $infoUpdated += 20;
+                            $facebookAccessToken = $longLivedAccessToken;
+                        }
+                    }
+                }
+            }
+            
             
             $infoUpdated += 4;
             Auth::user()->fb_token = $facebookAccessToken;

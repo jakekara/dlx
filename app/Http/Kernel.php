@@ -15,7 +15,11 @@ class Kernel extends HttpKernel {
 		'Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse',
 		'Illuminate\Session\Middleware\StartSession',
 		'Illuminate\View\Middleware\ShareErrorsFromSession',
-		//'App\Http\Middleware\VerifyCsrfToken',
+		
+        'App\Http\Middleware\VerifyCsrfToken',
+        
+        // Only run on certain pages or redirect loop
+        // (check routes.php)
         //'App\Http\Middleware\checker',
 	];
 

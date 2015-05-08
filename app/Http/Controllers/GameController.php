@@ -98,7 +98,7 @@ class GameController extends Controller
         try 
         {
             $wordList = $game->getWordsInOrder();
-            $players = $game->players;
+            $playersList = $game->getPlayersArray();
             
             if ($game === NULL || count($game) === 0)
             {
@@ -113,7 +113,7 @@ class GameController extends Controller
             // if user is autheticated, and user's id
             // is in list of active players,
             // load the game as a player
-            if (Auth::check() && strstr($players, ":" . Auth::user()->id .":"))
+            if (Auth::check() && $game->isPlayer(Auth::user()->id)) //strstr($players, ":" . Auth::user()->id .":"))
             {
                 
                 return view('user.game', array(
@@ -121,11 +121,11 @@ class GameController extends Controller
                     'game_id'=>$game_id,
                     'wordList'=> $wordList,
                     'message'=>'',
-                    'friendList'=>json_encode($friendList),
-                    'appFriendsList'=>json_encode($gameFriendList),
+                    'friendList'=>$friendList,
+                    'appFriendsList'=>$gameFriendList,
                     'joinRequestsList' =>   $requestedFriends,
                     'invitedFriendsList' => $invitedFriends,
-                    'currentPlayers' => $currentPlayers
+                    'playersList' => $playersList
                     
                 ));
 
@@ -348,7 +348,8 @@ class GameController extends Controller
             $this->addWord(0, 1);
             // go to next player
             $game->nextTurn();
-            return  $jsonHelper->succeedJson("Added first word.");
+            //return  $jsonHelper->succeedJson("Added first word.");
+            return $this->getAllGameData();
         }
         
         
@@ -369,11 +370,13 @@ class GameController extends Controller
             $game->nextTurn();
             $game = Game::find(Input::get('game_id'));
     
-            // return json
+            
+            return $this->getAllGameData();
+            /* return json
             return json_encode(array(
                 "status" => "SUCCESS",
                 "detailedStatus" => "Played word '". Input::get('word') ."' at beginning."
-            ), JSON_PRETTY_PRINT);
+            ), JSON_PRETTY_PRINT);*/
         }
         else
         {
@@ -387,10 +390,13 @@ class GameController extends Controller
                 $game->nextTurn();
                 $game = Game::find(Input::get('game_id'));
 
+                return $this->getAllGameData();
+                /*
                 return json_encode(array(
                     "status" => "SUCCESS",
                     "detailedStatus" => "Played word '". Input::get('word') ."' at end."
                 ), JSON_PRETTY_PRINT);
+                */
 
             }
             else
@@ -437,7 +443,12 @@ class GameController extends Controller
         
         if ($game->addInvite($playerId))
         {
-            return $jsonHelper->succeedJson("Invitation sent.");
+            return array(
+                "status" => "SUCCESS",
+                "detailedStatus" => "sent invitation",
+                "playerId" => $playerId,
+                "playerName" => User::find($playerId)->name
+            );
         }
         
         return $jsonHelper->failJson("Failed to send invitation");
@@ -606,9 +617,40 @@ class GameController extends Controller
         $game = Word::where('game_id' , '=', $game_id);
     }
     
+    
+    /** 
+        rewrite of getAllGameDataJson
+        to phase out unnecessary json
+        encoding
+    **/
+    
+    public function getAllGameData()
+    {
+        $game = Game::find(Input::get('game_id'));
+        
+        return array(
+                'status' => 'SUCCESS',
+                'wordList' => $game->getWordsInOrderAsArray(),
+                'score' => number_format($game->score),
+                'turn' => $game->turn,
+                'turnName' => User::find($game->turn)->name,
+                'userList' => $game->getPlayersArray(),
+                'requestsList' => $game->getRequests(),
+                'invitesList' => $game->getInvites()
+                
+        );
+        
+    }
+    
+    
     /**
         return Game data via json
-    **/
+        
+        Phasing out because there's 
+        no need to json encode. Now using
+        getAllGameData() instead
+        
+    **
     public function getAllGameDataJson()
     {
         // get points
@@ -627,7 +669,7 @@ class GameController extends Controller
                 'userList' => $game->active
             ), JSON_PRETTY_PRINT);
         
-    }
+    }*/
     
     public function getGamesJson()
     {

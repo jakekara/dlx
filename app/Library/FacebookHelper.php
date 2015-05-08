@@ -6,8 +6,8 @@ use App\AppInvite;
     logged in user
 **/
 
-use JsonResponseHelper;
 use Auth;
+use Input;
 use Facebook\FacebookSession;
 use Facebook\FacebookRequest;
 class FacebookHelper
@@ -16,6 +16,7 @@ class FacebookHelper
     
     public function getSession()
     {
+        
         // ensure authentication
         if (!Auth::check())
         {
@@ -32,6 +33,14 @@ class FacebookHelper
         {
             return null;
         }
+        
+        return $this->getSessionWithToken($token);
+    }
+    
+    /** get session or return NULL **/
+    
+    public function getSessionWithToken($token)
+    {
         
         // try logging in with token
         FacebookSession::setDefaultApplication(env('FB_APPID'), env('FB_APPSECRET'));
@@ -134,5 +143,41 @@ class FacebookHelper
         }
     }
     
+    // specified by facebook
+    public function base64_url_decode($input) 
+    {
+        return base64_decode(strtr($input, '-_', '+/'));
+    }
+    
+    /**
+        verify signed_request
+        code adapted from https://developers.facebook.com/docs/facebook-login/using-login-with-games
+    **/
+    public function verifySignedRequest($signed_request)
+    {
+        
+        // check that we have it
+        if (! $signed_request)
+        {
+            return null;
+        }
+
+        list($encoded_sig, $payload) = explode('.', $signed_request, 2); 
+
+        $secret = env('FB_APPSECRET');
+        
+        // decode the data
+        $sig = $this->base64_url_decode($encoded_sig);
+        $data = json_decode($this->base64_url_decode($payload), true);
+
+        // confirm the signature
+        $expected_sig = hash_hmac('sha256', $payload, $secret, $raw = true);
+        if ($sig !== $expected_sig) {
+               
+            error_log('Bad Signed JSON signature!');
+            return null;
+        }
+        return $data;
+    }
 }
 ?>

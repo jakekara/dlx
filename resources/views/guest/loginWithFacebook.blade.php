@@ -8,15 +8,16 @@
 <div class="jumbotron">
     <div class="container">
     
-        <h1>Log in with Facebook</h1>
+        <h1 id="loginTitle">Login</h1>
 
-        <p id="status"></p>
+        <p id="status">Dyslexicon and Facebook are having a little chat.</p>
 
-        <fb:login-button id="fbLoginButton" scope="public_profile,email,user_friends" onlogin="loginWithFacebook.checkLoginState();">
+        <fb:login-button hidden id="fbLoginButton" scope="public_profile,email,user_friends" onlogin="loginWithFacebook.checkLoginState();">
         </fb:login-button>
-
-    
     </div>
+    
 </div>
+        
+
 
 @stop

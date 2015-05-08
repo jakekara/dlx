@@ -11,7 +11,7 @@ class LeaderboardController extends Controller
     public function index()
     {
         // get top 10 games
-        $games = Game::orderBy('score', 'desc')->take(5)->get();
+        $games = Game::orderBy('score', 'desc')->take(20)->get();
         
         return view('home.leaderboard', array(
             'games'=>$games

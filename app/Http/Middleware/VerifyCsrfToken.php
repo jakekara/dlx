@@ -2,6 +2,7 @@
 
 use Closure;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as BaseVerifier;
+use App\Library\FacebookHelper;
 
 class VerifyCsrfToken extends BaseVerifier {
 
@@ -14,7 +15,27 @@ class VerifyCsrfToken extends BaseVerifier {
 	 */
 	public function handle($request, Closure $next)
 	{
-		return parent::handle($request, $next);
+
+        // if there is a facebook signed_request, verify it
+        // but don't look for normal CSRF token 
+        if ($request->has('signed_request'))
+        {
+            $facebookHelper = new FacebookHelper;
+            if ($facebookHelper->verifySignedRequest($request->get('signed_request')))
+            {
+                // signed request is valid, proceed
+                return $next($request);
+            }
+            else
+            {
+                return redirect("/apologize");
+            }
+        
+        }
+        
+        
+        // normal
+        return parent::handle($request, $next);
 	}
 
 }

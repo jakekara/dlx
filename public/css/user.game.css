@@ -1,0 +1,42 @@
+
+body
+{
+}
+
+#infoBar
+{
+    
+    padding:20px;
+    border-right: 1px solid lightgray;
+   
+}
+
+#gamePanel
+{
+
+    padding:20px
+}
+
+
+.infoBarSection
+{
+    
+}
+
+#wordInput 
+{
+
+}
+
+li.invitableFriend
+{
+    list-style: none;
+    padding: 4px;
+    float:left;
+}
+
+
+#glom
+{
+
+}
