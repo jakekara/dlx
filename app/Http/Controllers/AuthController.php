@@ -60,6 +60,7 @@ class AuthController extends Controller {
         $facebookId = Input::get('facebookId');
         $facebookName = Input::get('facebookName');
         $facebookAccessToken = Input::get('facebookAccessToken');
+        $facebookFirstName = Input::get('facebookFirstName');
         
         if ($facebookId == NULL)
         {
@@ -88,6 +89,17 @@ class AuthController extends Controller {
             Auth::loginUsingId($facebookId);
         }
 
+        // if facebook FirstName was given, update that
+        if (Input::has('facebookFirstName'))
+        {
+            if($facebookFirstName != 'null')
+            {
+                $infoUpdated += 100;
+                Auth::user()->first_name = $facebookFirstName;
+                Auth::user()->save();
+            }
+        }
+        
         // update name if we have it
         if (Input::has('facebookName'))
         {

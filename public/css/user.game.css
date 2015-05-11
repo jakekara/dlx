@@ -6,17 +6,21 @@ body
 #infoBar
 {
     
-    padding:20px;
-    border-right: 1px solid lightgray;
-   
+    //padding:20px;
+    //border-right: 1px solid lightgray;
+    color: lightslategray;
 }
 
 #gamePanel
 {
-
+    height: 100%;
     padding:20px
 }
 
+#gamePanel .magnifier
+{
+
+}
 
 .infoBarSection
 {
@@ -33,10 +37,4 @@ li.invitableFriend
     list-style: none;
     padding: 4px;
     float:left;
-}
-
-
-#glom
-{
-
 }

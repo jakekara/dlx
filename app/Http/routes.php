@@ -50,12 +50,19 @@ Route::match(['get', 'post'], "sorry/{reason}", "HomeController@sayWhatYoureSorr
 
 Route::match(['get', 'post'], 'leaderboard', 'LeaderboardController@index');
 
+Route::get('/show/game/{game_id}', 'GameController@showGameGuest');
+Route::get('/about', "HomeController@showAbout");
+
 Route::get('facebook/login', 'AuthController@facebookLogin');
 Route::post('facebook/setAccessToken', 'AuthController@setFacebookAccessToken');
 Route::post('facebook/updateUser', 'AuthController@updateFacebookUser');
 Route::group(['middleware' => ['App\Http\Middleware\checker']], function()
 {
     Route::get('home', 'HomeController@goHome');
+
+    
+    //invite friend to app
+    Route::match(['get', 'post'],'/facebook/invite/{user_id}', "GameController@inviteToApp");
 
     // game play
     Route::post('game/all', 'GameController@getAllGameData');
@@ -74,7 +81,8 @@ Route::group(['middleware' => ['App\Http\Middleware\checker']], function()
     Route::post('game/reject/invitation', "GameController@rejectInvitation");
     Route::post('game/reject/request', "GameController@rejectRequest");
     
-    //invite friend to app
-    Route::post('invite/{user_id}', "GameController@inviteToApp");
+    
+    // get list of your games
+    Route::post('get/games/', 'HomeController@getGames');
    
 });

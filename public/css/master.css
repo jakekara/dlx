@@ -1,3 +1,72 @@
 body {
+}
 
+#message
+{
+
+}
+
+#glom 
+{
+    word-wrap: break-word;
+    overflow-y: scroll;
+    height: 80%;
+   
+    padding: 50px;
+}
+
+span.glomItem
+{
+    font-size:60px;
+}
+
+span.glomItem, span.glomWithoutEnd, span.glomWithoutStart, span.glomWithoutStartOrEnd
+{
+    color: slategray;
+}
+
+span.glomFullWord
+{
+    color: lightcoral;
+}
+
+.score
+{
+    color:lightcoral;
+}
+
+span.small
+{
+}
+
+.controlBar
+{
+    padding: 50px;
+}
+
+.sheet
+{
+    width:75%;
+    min-width: 400px;
+    margin-right: auto;
+    margin-left:auto;
+}
+
+.niftyList 
+{
+    list-style: none;
+    width: 100%;
+}
+
+.niftyList li
+{
+
+}
+
+.niftyList:nth-child(2)
+{
+}
+
+table td {
+    border-top: none !important;
 }

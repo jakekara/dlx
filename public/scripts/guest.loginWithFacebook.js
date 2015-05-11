@@ -132,7 +132,7 @@ loginWithFacebook.testAPI = function() {
     FB.api('/me', function(response) {
     
         // send id and name. we won't have access token here.
-        $.post( "/facebook/updateUser", { _token : csrf_token, facebookId: response.id, facebookName: response.name }, loginWithFacebook.finish); 
+        $.post( "/facebook/updateUser", { _token : csrf_token, facebookId: response.id, facebookFirstName: response.first_name, facebookName: response.name }, loginWithFacebook.finish); 
         console.log(response);
         console.log('Successful login for: ' + response.name);
 

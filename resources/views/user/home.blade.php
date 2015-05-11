@@ -5,19 +5,64 @@
 @section('content')
 
     <div>
-        <h2>Your games</h2>
+
         <table class="table">
             <?php if (isset($games)) :?>
-                <?php $games = json_decode($games); ?>
-                <?php for($i = 0; $i < count($games); $i++) :?>
+                <?php foreach ($games as $game) :?>
                     <tr>
-                        <td><a href='/game/<?= $games[$i]->id ?>'>Game <?= $games[$i]->id ?></a></td>
-                        <td><?= $games[$i]->score ?> </td>
+                        <td><?= number_format($game->score); ?> </td>
+                        <td class="lead"><a href='/game/<?= $game->id ?>'><?= $game->glom(25); ?> ...</a></td>
+                        <td>
+                            <span class='small'>
+                            <?php $nameString = ""; ?>
+                            <?php foreach($game->getPlayersArray() as $player) : ?>
+                                <?php $nameString .= $player["name"] . ", " ?>
+                            <?php endforeach ; ?>
+                            <?php $nameString = rtrim($nameString, ", "); ?>
+                            <?= $nameString ; ?>
+                            </span>
+                        </td>
+                        <td>
+                        
+                            <?php if ($game->turn == Auth::user()->id) : ?>
+                                <!--<span class="small">you're up</span>-->
+                            <?php endif ;?>
+                        </td>
                         <td>  
-                            <button type="button" id="quitGame_<?= $games[$i]->id ?>" class="quitGameButton btn btn-default btn-sm" aria-label="Left Align"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Leave game</button>                             </td>
+                            <button type="button" id="quitGame_<?= $game->id ?>" class="quitGameButton btn btn-default btn-sm" aria-label="Left Align"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Leave game</button>
+                        </td>
                     </tr>
                 
-                <?php endfor ;?>
+                <?php endforeach ;?>
+            
+            <?php endif; ?>
+            
+            
+            <?php if (isset($gamesWithInvites)) :?>
+                <?php foreach ($gamesWithInvites as $game) :?>
+                    <tr>
+                        <td><?= number_format($game->score); ?> </td>
+                        <td class="lead"><a href='/game/<?= $game->id ?>'><?= $game->glom(25); ?> ...</a></td>
+                        <td>
+                            <span class='small'>
+                            <?php $nameString = ""; ?>
+                            <?php foreach($game->getPlayersArray() as $player) : ?>
+                                <?php $nameString .= $player["name"] . ", " ?>
+                            <?php endforeach ; ?>
+                            <?php $nameString = rtrim($nameString, ", "); ?>
+                            <?= $nameString ; ?>
+                            </span>
+                        </td>
+                        <td>
+                            <?php if ($game->turn == Auth::user()->id) : ?>
+                                <span class="small">you're up</span>
+                            <?php endif ;?>
+                        <td>  
+                            <button type="button" id="quitGame_<?= $game->id ?>" class="quitGameButton btn btn-default btn-sm" aria-label="Left Align"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Leave game</button>
+                        </td>
+                    </tr>
+                
+                <?php endforeach ;?>
             
             <?php endif; ?>
 

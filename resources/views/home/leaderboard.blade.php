@@ -4,20 +4,33 @@
 @extends('layouts.master')
 @section('content')
 
-    <h1>Leaderboard</h1>
+    <div>
+        <div class="jumbotron">
+          <h1>The best of the best</h1>
+          <p>Check out some of our top-scoring games.</p>
+        </div>
+        <table class="leaderboard table">
+            <?php if (isset($games)) :?>
+                <?php foreach ($games as $game) :?>
+                    <tr>
+                        <td><span class="score"></span><?= number_format($game->score); ?></span></td>
+                        <td class="lead glomItem"><a href='/game/<?= $game->id ?>'><?= $game->glom(25); ?> ...</a></td>
+                        <td>
+                            <?php $nameString = ""; ?>
+                            <?php foreach($game->getPlayersArray() as $player) : ?>
+                                <?php $nameString .= $player["first_name"] . ", " ?>
+                            <?php endforeach ; ?>
+                            <span class="small"><?php $nameString = rtrim($nameString, ", "); ?></span>
+                            <?= $nameString ; ?>
+                        </td>
 
-    <table class="table">
-        <tr>
-            <th>Score</th>
-            <th>Game</th>
-            <th>Players</th>
-        </tr>
-        <?php foreach ($games as $game):?>
-            <tr>
-                <td><?= $game->score ?></td>
-                <td><a href="/game/<?= $game->id ?>">Dyslexicondominium....</a></td>
-                <td><?= $game->players ?></td>
-            </tr>
-        <?php endforeach; ?>
-    </table>
+                    </tr>
+                
+                <?php endforeach ;?>
+            
+            <?php endif; ?>
+
+                
+        </table>
+    </div>
 @stop

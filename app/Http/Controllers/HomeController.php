@@ -7,14 +7,8 @@ use App\Game;
 class HomeController extends Controller {
 
 	/*
-	|--------------------------------------------------------------------------
-	| Home Controller
-	|--------------------------------------------------------------------------
-	|
-	| This controller renders your application's "dashboard" for users that
-	| are authenticated. Of course, you are free to change or remove the
-	| controller as you wish. It is just here to get your app started!
-	|
+	
+        Load the non-game views
 	*/
 
 	/**
@@ -50,10 +44,8 @@ class HomeController extends Controller {
     public function userHome()
     {
         //dd (Auth::user()->id);
-        $games = json_encode(Game::where('players', 'LIKE', '%:' . Auth::user()->id . ':%')->get());
-        return view('user.home', array(
-            'games'=>$games
-        ));
+        
+        return view('user.home', $this->getGames());
     }
     
     public function goHome()
@@ -67,5 +59,25 @@ class HomeController extends Controller {
             return $this->guestHome();
         }
     }
+    
+    public function getGames()
+    {
+        $games = Game::where('players', 'LIKE', '%:' . Auth::user()->id . ':%')->orderBy('updated_at', 'desc')->get();
+        $gamesWithInvites = Game::where('user_invites', 'LIKE', '%:' . Auth::user()->id . ':%')->get();
+
+        return array(
+            'games'=>$games, 
+            'gamesWithInvites' => $gamesWithInvites
+        );
+    }
+    
+    /**
+        show about page
+    **/
+    public function showAbout()
+    {
+        return view("guest.about");
+    }
+    
 
 }

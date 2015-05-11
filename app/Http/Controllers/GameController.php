@@ -52,8 +52,7 @@ class GameController extends Controller
     {
         // find game
         $game = Game::find($game_id);
-
-                
+    
         // load friends list to populate "invite" field
         $fbHelper = new FacebookHelper;
         $friendList = $fbHelper->getFriends();
@@ -170,7 +169,8 @@ class GameController extends Controller
                 {
                     $invited = "YES";
                 }
-                
+                $wordList = $game->getWordsInOrderAsArray();
+
                 return view ('guest.game', array(   
                     'wordList' => $wordList,
                     'game_id'=>$game_id,
@@ -252,7 +252,8 @@ class GameController extends Controller
         else
         {
             
-            $points = pow($overlap, 10);
+            $points = $overlap * 100;
+            $points += 10 * (strlen(Input::get('word')));
             
             // update score
             $game = Game::find(Input::get('game_id'));
@@ -284,10 +285,10 @@ class GameController extends Controller
         $game = Game::find(Input::get('game_id'));
         if ( $game == NULL)
         {
-            return json_encode(array(
+            return array(
                 "status" => "ERROR",
                 "detailedStatus" => "Game does not exist.",
-            ));
+            );
 
         }
         
@@ -299,46 +300,72 @@ class GameController extends Controller
         
         if ($word == NULL)
         {
-            return json_encode(array(
+            return array(
                 "status" => "FAILURE",
                 "detailedStatus" => "No word supplied."
-            ));
+            );
         }
         
         else if (!ctype_alpha($word))
         {
-            return json_encode(array(
+            return array(
                 "status" => "FAILURE",
                 "detailedStatus" => "Word must contain only letters."
-            ));
+            );
         }
     
         
         // determine if user is authenticated
         if (!Auth::check())
         {
-            return json_encode(array(
+            return array(
                 "status" => "FAILURE",
                 "detailedStatus" => "You are not logged in."
-            ));
+            );
         }
         
-        
+         /**
+            --------------------------------------------------
+            TAKING TURNS IS DISABLED. PLAY AS MUCH AS YOU LIKE
+            --------------------------------------------------
+            // I decided there's really no need to have users take turns
+            // adding words. If you want to add five or six words in one
+            // sitting, go for it, and you won't get hung up waiting for 
+            // a friend to make a move.    
+            // if we got a new turn, 
+            // update whose turn it is
+            // and if button is active or not
         
         // determine if it's the user's turn
         else if (!Game::find(Input::get('game_id'))->turn == Auth::user()->id)
         {
-            return json_encode(array(
+            return array(
                 "status" => "FAILURE",
                 "detailedStatus" => "It's not your turn.",
-            ));
+            );
         }
+        **/
         
         // determine if it's in the dictionary
         $inDictionary = DictionaryWord::where('word', 'LIKE', strtolower($word))->first();
         if ($inDictionary == null)
         {
-            return $jsonHelper->failJson("Not a dictionary word");
+            return array(
+                "status" => "FAILURE",
+                "detailedStatus" => "Not a dictionary word."
+            );
+        }
+        
+        $duplicate = Word::where('word', '=', $word)
+            ->where('game_id', '=', Input::get('game_id'))
+            ->first();
+        if ($duplicate != null)
+        {
+            return array(
+                "status" => "FAILURE",
+                "detailedStatus" => "That word, '" . $duplicate->word . "', has already been used."
+            );
+
         }
                                                    
         // determine if there are any words played yet
@@ -360,7 +387,9 @@ class GameController extends Controller
         $lastWord = $words[$keys[(count($words) - 1)]];
         
         // determine if we can add the word at the beginning
-        $overlap = GameController::canAppend($word, $firstWord->word);
+        // old way - $overlap = GameController::canAppend($word, $firstWord->word);
+        $overlap = $game->canPrependToThisGame($word);
+        
         if ($overlap >= 2)
         {
             // add word to beginning
@@ -380,7 +409,9 @@ class GameController extends Controller
         }
         else
         {
-            $overlap = GameController::canAppend($lastWord->word, $word);
+            // determine if we can prepend the word
+            // old way $overlap = GameController::canAppend($lastWord->word, $word);
+            $overlap = $game->canAppendToThisGame($word);
             
             if ($overlap >= 2)
             {
@@ -389,7 +420,7 @@ class GameController extends Controller
                 // go to next player
                 $game->nextTurn();
                 $game = Game::find(Input::get('game_id'));
-
+                    
                 return $this->getAllGameData();
                 /*
                 return json_encode(array(
@@ -401,22 +432,22 @@ class GameController extends Controller
             }
             else
             {        
-                return json_encode(array(
+                return array(
                     "status" => "FAILURE",
                     "detailedStatus" => "Could not append word '". Input::get('word') 
                     ."' at beginning or end.",
-                ), JSON_PRETTY_PRINT);
+               );
 
             }
         }
  
         
-        return json_encode(array(
+        return array(
             "status" => "FAILURE",
             "detailedStatus" => "Unkown failure playing word '". Input::get('word') ."'.",
             "overlap" => $overlap,
             "wordList" => $game->getWordsInOrderAsArray()
-        ), JSON_PRETTY_PRINT);
+        );
     }
     
     // get glom
@@ -533,11 +564,11 @@ class GameController extends Controller
     }
     
     
-     /**
+    /**
         determine if two words can be added together
         by appending $second on to first
     **/
-    protected function canAppend($first, $second)
+    public static function canAppend($first, $second)
     {
         // determine the max number of letters that could overlap
         // requiring at least two letters to be overlapped
@@ -637,7 +668,6 @@ class GameController extends Controller
                 'userList' => $game->getPlayersArray(),
                 'requestsList' => $game->getRequests(),
                 'invitesList' => $game->getInvites()
-                
         );
         
     }
@@ -706,9 +736,10 @@ class GameController extends Controller
         $newGame->score = 0;
         $newGame->save();
         
-        $jsonHelper->returnJson("SUCCESS", array(
+        return array(
+            "status" => "SUCCESS",
             "newGameId" => $newGame->id
-        ));
+        );
         
     }
     
@@ -753,7 +784,10 @@ class GameController extends Controller
         // delete player from active player list
         $game->players = str_replace($paddedUserId, "", $game->players);
         $game->save();
-        return $jsonHelper->succeedJson("Deleted user " . Auth::user()->id . " from active players list.");
+        return array(
+            "status" => "SUCCESS",
+            "detailedStatus" => "Quit game " . $gameId
+        );
 
         // TO PONDER -- Should games ever be entirely deleted from database?
         // perhaps if they have no words and the only player is the one deleting the game.
@@ -762,7 +796,6 @@ class GameController extends Controller
     
     public function inviteToApp($user_id)
     {
-        $jsonHelper = new JsonResponseHelper;
         
         $invitation = AppInvite::where('facebook_id', '=', $user_id)->first();
         if ($invitation == null)
@@ -770,14 +803,30 @@ class GameController extends Controller
             $invitation = new AppInvite;
             $invitation->facebook_id = $user_id;
             $invitation->save();
-            return $jsonHelper->returnJson("SUCCESS", array(
+            return array(
+                'status' => "SUCCESS", 
                 'divToDelete' => 'inviteFriendToDyslexiconListItem_' . $user_id,
                 'detailedStatus' => 'Friend request sent',
                 'friendId' => $user_id,
                 'appId' => env('FB_APPID')
-            ));
+            );
         }
-        return $jsonHelper->failJson("Cannot send request. Friend has already been invited");
+        return array("status"=>"FAILURE",
+                     "detailedStatus" => "Cannot send request. Friend has already been invited");
+    }
+    
+    /**
+        show the non-logged-in game view
+    **/
+    public function showGameGuest($game_id)
+    {
+
+        $game = Game::find($game_id);
+        $wordList = $game->getWordsInOrderAsArray();
+
+        return view ('guest.permaGameView', array(
+            'wordList' => $wordList
+        ));
     }
     
 }

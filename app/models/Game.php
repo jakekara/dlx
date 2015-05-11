@@ -1,33 +1,83 @@
 <?php namespace App;
 
+/**
+    Game model, extends interface
+    for database via Eloquent ORM
+    
+**/
+
 use Illuminate\Database\Eloquent\Model;
 use Auth;
+use App\Http\Controllers\GameController;
 class Game extends Model 
 {
-    
-    
-	public function words()
+    /**
+     creat relationship to words 
+	**/
+    public function words()
     {
         return $this->hasMany('App\Word', 'game_id');
     }
     
+    /**
+        return invitations from invitations 
+    **/
     public function invites()
     {
         return $this->hasMany('App\GameInvite', 'game_id');
     }
-      
+    
+    /**
+        return requests from requests table
+    **/
     public function requests()
     {
         return $this->hasMany('App\GameRequest', 'game_id');
     }
 
-    // get an ordered object of words records
+    /**
+        get an ordered object of words records
+    **/
     public function getWordsInOrder()
     {
         return $this->words->sortBy(function($role){
             return $role->position;
         });;
         
+    }
+    
+    /**
+        get full glom
+    **/
+    public function glom()
+    {
+        $wordObject = $this->getWordsInOrder();
+        $glomString = "";
+        
+        foreach ($wordObject as $word)
+        {
+            // determine how much to overlap
+            $overlap = Game::canAppend($glomString, $word->word);
+            
+            if ($overlap > 0)
+            {
+                
+                $glomString = substr($glomString, 0, strlen($glomString) - $overlap);
+            }
+            
+            $glomString .= $word->word;
+        }
+        
+        return $glomString;
+    }
+    
+    /**
+        get the first n letters of glom, all
+        glommed together
+    **/
+    public function glomPreview($limit = 30)
+    {
+        substr($this->glom, 0, $limit);
     }
 
     // get an ordered array of words
@@ -117,7 +167,8 @@ class Game extends Model
             
             $playerArrayWithName = array(
                 "id"=>$playerId,
-                "name"=>$user->name
+                "name"=>$user->name,
+                "first_name"=>$user->first_name
             );
             
             array_push($arrayWithNames, $playerArrayWithName);
@@ -385,57 +436,60 @@ class Game extends Model
         return "success";
     }
     
-    /*
-    // request to join game
-    public function requestToJoin()
-    {
-        // ensure authentication
-        if (!Auth::check())
-        {
-            return null;
-        }
-        
-        // if user already on the list of players
-        if (strpos($this->players, Auth::user()->paddedId()))
-        {
-            // no need to add them
-            return null;
-        }
-        
-        // if user is already on request list
-        if ($this->isRequesting())  //(strpos($this->user_request, Auth::user()->paddedId()))
-        {
-            // no need to add them
-            return null;
-        }
-        
-        // good to go
-        $this->user_requests = $this->user_requests . Auth::user()->paddedId();
-        $this->save();
-        
-        return "success";
-    }*
-    
-    // invite player to join
-    public function invitePlayer($playerId)
-    {
-        // ensure authentication
-        if (!Auth::check())
-        {
-            return null;
-        }
-        
-         // if user is not on the list of players
-        if (strpos($this->players, Auth::user()->paddedId()))
-        {
-            // then they can't invite people
-            return null;
-        }
-        
-        // good to go
-        $this->user_invites = $this->user_invites . ":" . $playerId . ":";
-        
-    }*/
 
+        
+    /**
+        determine if two words can be added together
+        by appending $second on to $first
+    **/
+    public static function canAppend($first, $second)
+    {
+        // determine the max number of letters that could overlap
+        // requiring at least two letters to be overlapped
+        // and two letters to be added
+        
+        /*
+        $maxOverlap = min(strlen($first), strlen($second)) - 2;
+        
+        if ($maxOverlap < 2)
+        {
+            // not long enough
+            return -2;
+        }
+        
+        for ($i = 2; $i <= $maxOverlap; $i++)
+        */
+        for ($i = 2; $i < max(strlen($first), strlen($second)); $i++)
+        {
+            // compare first i letters of $second
+            // and last i letters of $first
+             
+            $endOfFirst = substr($first, strlen($first) - $i, $i);
+            $startOfSecond = substr($second, 0, $i);
+                        
+            if ( $endOfFirst == $startOfSecond)
+            {
+                return $i;
+            }
+        }
+        
+        return -1;
+    }
+
+    /**
+        determine if a word can be appended to this game
+    **/
+    public function canAppendToThisGame($word)
+    {
+        return Game::canAppend($this->glom(), $word);
+    }   
+    
+    /**
+        determine if a word can be prepended to this game
+    **/
+    public function canPrependToThisGame($word)
+    {
+        return Game::canAppend($word, $this->glom());
+    }
 }
 

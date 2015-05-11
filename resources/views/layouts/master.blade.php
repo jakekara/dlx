@@ -19,6 +19,7 @@
     <body>
 
         <div id="fb-root">
+        </div>
                 <nav class="navbar navbar-default">
                     <!-- We use the fluid option here to avoid overriding the fixed width of a normal container within the narrow content columns. -->
                     <div class="container-fluid">
@@ -29,13 +30,14 @@
                                 <span class="icon-bar"></span>
                                 <span class="icon-bar"></span>
                             </button>-->
-                            <a class="navbar-brand" href="#">[ Dyslexicon  ]</a>
+                            <a class="navbar-brand">[ Dyslexicon  ]</a>
                         </div>
                         
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-6">
                         <ul class="nav navbar-nav">
                             <li id="masterHomeButton"><a href="/home">Home</a></li>
                             <li id="masterLeaderboardButton"><a href="/leaderboard">Leaderboard</a></li>
+                            <li id="masterLeaderboardButton"><a href="/about">About</a></li>
                             <li id="masterLoginStatus">
                                 <?php if (Auth::check()): ?>
                                     <a href="/logout">Logout <?= Auth::user()->name ;?></a>
@@ -62,7 +64,7 @@
                     @yield('content')       
             </div>
             
-        </div>
+        
     </body>
     
 </html>
