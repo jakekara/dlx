@@ -6,12 +6,12 @@
 
     <div>
 
-        <table class="table">
+        <table class="table table-hover">
             <?php if (isset($games)) :?>
                 <?php foreach ($games as $game) :?>
                     <tr>
                         <td><?= number_format($game->score); ?> </td>
-                        <td class="lead"><a href='/game/<?= $game->id ?>'><?= $game->glom(25); ?> ...</a></td>
+                        <td class="lead"><a href='/game/<?= $game->id ?>'><?= $game->glomPreview(); ?> ...</a></td>
                         <td>
                             <span class='small'>
                             <?php $nameString = ""; ?>

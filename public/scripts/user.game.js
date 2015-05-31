@@ -453,12 +453,11 @@ userGameView.result = function (result)
         }
         
         $("#wordList").html(wordListHtml);
-        
+        $("#wordCount").html(robj.wordList.length);
+        console.log( $("#wordCount").html() + " : " + robj.wordList.length);
+
         masterScript.updateGlom(robj.wordList);
         
-        
-
-        $("#wordCount").html(wordList.length);
     }
     
     // update player list if we have it

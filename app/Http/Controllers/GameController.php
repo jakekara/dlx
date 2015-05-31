@@ -784,6 +784,10 @@ class GameController extends Controller
         // delete player from active player list
         $game->players = str_replace($paddedUserId, "", $game->players);
         $game->save();
+        if ($game->players == "" && count($game->words()) > 0)
+        {
+            $game->delete();
+        }
         return array(
             "status" => "SUCCESS",
             "detailedStatus" => "Quit game " . $gameId

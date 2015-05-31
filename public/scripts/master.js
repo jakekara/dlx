@@ -92,7 +92,8 @@ masterScript.wordListToGlomHtml = function (wordList)
             }
             else if (endOfOverlap > word.length - startOfOverlap && i+1 < wordList.length)
             {
-                newHtml += word.substring( endOfOverlap, word.length - startOfOverlap);
+                newHtml += ""; //word.substring( endOfOverlap, word.length - startOfOverlap);
+                newHtml += "</span><span hidden class='glomCutFromNext'>" + word.substring( endOfOverlap, word.length - startOfOverlap);
             }
             else if (i+1 == wordList.length)
             {
@@ -180,7 +181,12 @@ masterScript.updateGlom = function (wordList)
             // magnify individual words
             
             $(this).hover(function()
-            {         
+            {       
+                if ($(this).hasClass("glomIn"))
+                {
+                    return;
+                }
+                
                 $(this).addClass("glomIn");
                 
                 $(this).children().hide();
@@ -190,6 +196,17 @@ masterScript.updateGlom = function (wordList)
                 {
                     $(this).next().children().hide();
                     $(this).next().find(".glomWithoutStartOrEnd").show();
+                    if (!$.isEmptyObject($(this).next().find(".glomCutFromNext").html()))
+                    {
+                        if ($(this).next().find(".glomCutFromNext").html().length > 0)
+                        {
+                            // if there is text to cut from the next word...
+                            $(this).next().next().find(".glomWithoutEnd").html(
+                                $(this).next().next().find(".glomWithoutEnd").html().substring($(this).next().find(".glomCutFromNext").html().length)
+                            );
+                        }
+                    }
+                    
                 }
                 
                 if ($(this).prev().hasClass("glomItem"))
@@ -208,6 +225,8 @@ masterScript.updateGlom = function (wordList)
                     return;
                 }
                 
+                $(this).removeClass("glomIn");
+
                 $(this).children().hide();
                 $(this).find(".glomWithoutEnd").show();
                 
@@ -215,6 +234,18 @@ masterScript.updateGlom = function (wordList)
                 {
                     $(this).next().children().hide();
                     $(this).next().find(".glomWithoutEnd").show();
+                    
+                    if (!$.isEmptyObject($(this).next().find(".glomCutFromNext").html()))
+                    { 
+                        if ($(this).next().find(".glomCutFromNext").html().length > 0)
+                        {
+                            // if there is text to cut from the next word...
+                            $(this).next().next().find(".glomWithoutEnd").html( 
+                                $(this).next().find(".glomCutFromNext").html() +  
+                                $(this).next().next().find(".glomWithoutEnd").html()
+                            );
+                        }
+                    }
                 }
                 
                 if ($(this).prev().hasClass("glomItem"))
@@ -222,6 +253,8 @@ masterScript.updateGlom = function (wordList)
                     $(this).prev().children().hide();
                     $(this).prev().find(".glomWithoutEnd").show();
                 }
+                
+                
             });             
         });
 }

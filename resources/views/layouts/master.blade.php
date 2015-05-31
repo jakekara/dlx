@@ -5,7 +5,7 @@
         <title>Dyslexicon | @yield('title')</title>
         
         <meta name="csrf-token" content="{{ csrf_token() }}" />
-        
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
         <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel="stylesheet">
         <link href="/css/master.css" rel="stylesheet">
@@ -30,7 +30,7 @@
                                 <span class="icon-bar"></span>
                                 <span class="icon-bar"></span>
                             </button>-->
-                            <a class="navbar-brand">[ Dyslexicon  ]</a>
+                            <a class="navbar-brand"><img height="20px" src="/img/dyslexicon-transparency.png"></a>
                         </div>
                         
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-6">

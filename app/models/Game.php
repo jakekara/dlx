@@ -75,9 +75,9 @@ class Game extends Model
         get the first n letters of glom, all
         glommed together
     **/
-    public function glomPreview($limit = 30)
+    public function glomPreview($limit = 50)
     {
-        substr($this->glom, 0, $limit);
+        return substr($this->glom(), 0, $limit);
     }
 
     // get an ordered array of words

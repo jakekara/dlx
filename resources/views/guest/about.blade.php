@@ -20,8 +20,8 @@
         <p class="lead">Start with a word. Any word. Then add another to the end or the beginning.</p>
         <blockquote id="glom">
             <p><span class="glomItem">computer</span></p>
-            <p><span class="glomItem">compu</span><span class="glomItem glomFullWord">terestrial</span></p>
-            <p><p><span class="glomItem">compu</span><span class="glomItem">terestri</span><span class="glomItem glomFullWord">always</span></p>
+            <p><span class="glomItem">compu</span><span class="glomItem glomFullWord">terrestrial</span></p>
+            <p><p><span class="glomItem">compu</span><span class="glomItem">terrestri</span><span class="glomItem glomFullWord">always</span></p>
         </blockquote>
         
         <p class="small"><strong>Some rules:</strong    > Words must be four letters or more and overlap the existing 'glom' by at least two words. 
